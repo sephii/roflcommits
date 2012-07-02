@@ -14,7 +14,8 @@ from image import ImageManipulator
 from snapshot import Snapshot
 
 def enable_commit_hook(options):
-    pass
+    with open('.git/hooks/post-commit', 'w') as f:
+        f.writelines(['#!/usr/bin/env python', '~/private/roflcommits/roflcommits.py snapshot_upload'])
 
 def disable_commit_hook(options):
     pass
@@ -35,7 +36,10 @@ def snapshot(options):
             font_file, font_size)
     im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
             font_file, font_size)
-    im.save('/tmp/foobar.jpg')
+    print os.path.expanduser(os.path.join(options.destination,
+        gp.get_hash('-1')) + '.jpg')
+    im.save(os.path.expanduser(os.path.join(options.destination,
+        gp.get_hash('-1')) + '.jpg'))
     #with tempfile.NamedTemporaryFile(suffix='.png') as tmp:
     #    im.save(tmp.name)
 
@@ -44,7 +48,15 @@ def snapshot(options):
     #    f.upload(tmp.name, gp.get_hash('-1'), category_name='git commits')
 
 def upload(options):
-    pass
+    gp = GitParser()
+    image = os.path.expanduser(os.path.join(options.destination,
+        gp.get_hash('-1')) + '.jpg')
+    f = remote.Flickr()
+    f.upload(image, gp.get_hash('-1'), category_name='git commits')
+
+def snapshot_upload(options):
+    snapshot(options)
+    upload(options)
 
 if __name__ == '__main__':
     font_file = 'data/fonts/impact.ttf'
@@ -52,6 +64,8 @@ if __name__ == '__main__':
 
     usage = 'foobar'
     opt = optparse.OptionParser(usage=usage, version='%prog')
+    opt.add_option('-d', '--destination', dest='destination', help='path to'\
+            ' directory that will hold the snapshots', default='~/.roflcommits')
     (options, args) = opt.parse_args()
 
     actions = {
@@ -61,6 +75,7 @@ if __name__ == '__main__':
         'disable-push-hook': disable_push_hook,
         'snapshot': snapshot,
         'upload': upload,
+        'snapshot-and-upload': snapshot_upload,
     }
 
     if args[0] not in actions:
