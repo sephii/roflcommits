@@ -13,50 +13,67 @@ from git import GitParser
 from image import ImageManipulator
 from snapshot import Snapshot
 
-def enable_commit_hook(options):
-    with open('.git/hooks/post-commit', 'w') as f:
-        f.writelines(['#!/usr/bin/env python', '~/private/roflcommits/roflcommits.py snapshot_upload'])
+class Roflcommits:
+    HOOKS_DIR = '.git/hooks'
+    COMMIT_HOOKS_FILE = os.path.join(HOOKS_DIR, 'post-commit')
+    PUSH_HOOKS_FILE = os.path.join(HOOKS_DIR, 'update')
 
-def disable_commit_hook(options):
-    pass
+    def _create_hooks_dir(self):
+        if not os.path.exists(self.HOOKS_DIR):
+            os.mkdir(self.HOOKS_DIR)
 
-def enable_push_hook(options):
-    pass
+    def enable_commit_hook(self, options):
+        commit_hook_contents = """#!/usr/bin/env sh
+    python ~/private/roflcommits/roflcommits.py snapshot-and-upload"""
 
-def disable_push_hook(options):
-    pass
+        _create_hooks_dir()
+        with open(self.COMMIT_HOOKS_FILE, 'w') as f:
+            f.write(commit_hook_contents)
 
-def snapshot(options):
-    gp = GitParser()
-    sn = Snapshot()
+    def disable_commit_hook(self, options):
+        if os.path.exists(self.COMMIT_HOOKS_FILE):
+            os.remove(self.COMMIT_HOOKS_FILE)
 
-    image_path = sn.snapshot()
-    im = ImageManipulator(image_path)
-    im.add_text(gp.get_message('-1'), ImageManipulator.POSITION_BOTTOMLEFT,
-            font_file, font_size)
-    im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
-            font_file, font_size)
-    print os.path.expanduser(os.path.join(options.destination,
-        gp.get_hash('-1')) + '.jpg')
-    im.save(os.path.expanduser(os.path.join(options.destination,
-        gp.get_hash('-1')) + '.jpg'))
-    #with tempfile.NamedTemporaryFile(suffix='.png') as tmp:
-    #    im.save(tmp.name)
+    def enable_push_hook(self, options):
+        commit_hook_contents = """#!/usr/bin/env sh
+    python ~/private/roflcommits/roflcommits.py upload"""
 
-    #    print 'Publishing on flickr...'
-    #    f = remote.Flickr()
-    #    f.upload(tmp.name, gp.get_hash('-1'), category_name='git commits')
+        _create_hooks_dir()
+        with open(self.PUSH_HOOKS_FILE, 'w') as f:
+            f.write(commit_hook_contents)
 
-def upload(options):
-    gp = GitParser()
-    image = os.path.expanduser(os.path.join(options.destination,
-        gp.get_hash('-1')) + '.jpg')
-    f = remote.Flickr()
-    f.upload(image, gp.get_hash('-1'), category_name='git commits')
+    def disable_push_hook(self, options):
+        if os.path.exists(self.PUSH_HOOKS_FILE):
+            os.remove(self.PUSH_HOOKS_FILE)
 
-def snapshot_upload(options):
-    snapshot(options)
-    upload(options)
+    def _get_snapshot_destination(self, dir):
+        gp = GitParser()
+
+        return os.path.expanduser(os.path.join(options.destination,
+            gp.get_hash('-1')) + '.jpg')
+
+    def snapshot(self, options):
+        gp = GitParser()
+        sn = Snapshot()
+
+        image_path = sn.snapshot()
+        im = ImageManipulator(image_path)
+        im.add_text(gp.get_message('-1'), ImageManipulator.POSITION_BOTTOMLEFT,
+                font_file, font_size)
+        im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
+                font_file, font_size)
+        print _get_snapshot_destination(options.destination)
+        im.save(_get_snapshot_destination(options.destination))
+
+    def upload(self, options):
+        gp = GitParser()
+        image = _get_snapshot_destination(options.destination)
+        f = remote.Flickr()
+        f.upload(image, gp.get_hash('-1').encode('utf-8'), category_name='git commits')
+
+    def snapshot_upload(self, options):
+        snapshot(options)
+        upload(options)
 
 if __name__ == '__main__':
     font_file = 'data/fonts/impact.ttf'
@@ -68,14 +85,16 @@ if __name__ == '__main__':
             ' directory that will hold the snapshots', default='~/.roflcommits')
     (options, args) = opt.parse_args()
 
+    rc = Roflcommits()
+
     actions = {
-        'enable-commit-hook': enable_commit_hook,
-        'disable-commit-hook': disable_commit_hook,
-        'enable-push-hook': enable_push_hook,
-        'disable-push-hook': disable_push_hook,
-        'snapshot': snapshot,
-        'upload': upload,
-        'snapshot-and-upload': snapshot_upload,
+        'enable-commit-hook': rc.enable_commit_hook,
+        'disable-commit-hook': rc.disable_commit_hook,
+        'enable-push-hook': rc.enable_push_hook,
+        'disable-push-hook': rc.disable_push_hook,
+        'snapshot': rc.snapshot,
+        'upload': rc.upload,
+        'snapshot-and-upload': rc.snapshot_upload,
     }
 
     if args[0] not in actions:

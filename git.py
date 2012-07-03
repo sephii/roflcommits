@@ -18,6 +18,7 @@ class GitParser:
         if return_mode == self.RETURN_MODE_OUTPUT:
             output = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT).communicate()[0]
+            output = output.decode('utf-8')
         else:
             output = subprocess.call(cmd)
 
