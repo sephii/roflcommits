@@ -18,7 +18,7 @@ class Flickr(Remote):
             raw_input("Press ENTER after you authorized this program")
         self.flickr.get_token_part_two((token, frob))
 
-    def upload(self, image_path, image_title, image_description=None,
+    def upload(self, image_path, image_title, image_description='',
                category_name=None):
         photo = self.flickr.upload(filename=image_path,
                 title=image_title,

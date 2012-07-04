@@ -69,4 +69,4 @@ class Snapshot:
 
 class DummySnapshot(Snapshot):
     def snapshot(self):
-        return 'data/test.jpg'
+        return 'data/sample.jpg'

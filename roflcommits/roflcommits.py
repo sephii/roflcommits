@@ -18,6 +18,10 @@ class Roflcommits:
     COMMIT_HOOKS_FILE = os.path.join(HOOKS_DIR, 'post-commit')
     PUSH_HOOKS_FILE = os.path.join(HOOKS_DIR, 'update')
 
+    def __init__(self, font_file, font_size):
+        self.font_file = font_file
+        self.font_size = font_size
+
     def _create_hooks_dir(self):
         if not os.path.exists(self.HOOKS_DIR):
             os.mkdir(self.HOOKS_DIR)
@@ -26,7 +30,7 @@ class Roflcommits:
         commit_hook_contents = """#!/usr/bin/env sh
 roflcommits snapshot"""
 
-        _create_hooks_dir()
+        self._create_hooks_dir()
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
 
@@ -44,7 +48,7 @@ roflcommits snapshot"""
         commit_hook_contents = """#!/usr/bin/env sh
 roflcommits upload"""
 
-        _create_hooks_dir()
+        self._create_hooks_dir()
         with open(self.PUSH_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
 
@@ -62,18 +66,18 @@ roflcommits upload"""
     def _get_snapshot_destination(self, dir):
         gp = GitParser()
 
-        return os.path.join(self._get_snapshots_dir(options.destination), gp.get_hash('-1')) + '.jpg'
+        return os.path.join(self._get_snapshots_dir(dir), gp.get_hash('-1')) + '.jpg'
 
     def snapshot(self, options):
         gp = GitParser()
-        sn = DummySnapshot()
+        sn = Snapshot()
 
         image_path = sn.snapshot()
         im = ImageManipulator(image_path)
         im.add_text(gp.get_message('-1'), ImageManipulator.POSITION_BOTTOMLEFT,
-                font_file, font_size)
+                self.font_file, self.font_size)
         im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
-                font_file, font_size)
+                self.font_file, self.font_size)
         im.save(self._get_snapshot_destination(options.destination))
 
     def upload(self, options, file=None):
@@ -91,15 +95,15 @@ roflcommits upload"""
         else:
             title = os.path.splitext(os.path.basename(file))[0]
             print "Roflcommits: uploading %s" % title
-            f.upload(file_path, title, category_name='git commits')
-            os.remove(file_path)
+            f.upload(file, title, category_name='git commits')
+            os.remove(file)
 
     def snapshot_upload(self, options):
         self.snapshot(options)
         self.upload(options, self._get_snapshot_destination(options.destination))
 
 def main():
-    font_file = 'data/fonts/impact.ttf'
+    font_file = os.path.join(os.path.dirname(__file__), 'data/fonts/impact.ttf')
     font_size = 32
 
     usage = 'foobar'
@@ -108,7 +112,7 @@ def main():
             ' directory that will hold the snapshots', default='~/.roflcommits')
     (options, args) = opt.parse_args()
 
-    rc = Roflcommits()
+    rc = Roflcommits(font_file, font_size)
 
     actions = {
         'enable-commit-hook': rc.enable_commit_hook,
