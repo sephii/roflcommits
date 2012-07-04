@@ -11,7 +11,7 @@ import remote
 
 from git import GitParser
 from image import ImageManipulator
-from snapshot import Snapshot
+from snapshot import DummySnapshot, Snapshot
 
 class Roflcommits:
     HOOKS_DIR = '.git/hooks'
@@ -24,37 +24,49 @@ class Roflcommits:
 
     def enable_commit_hook(self, options):
         commit_hook_contents = """#!/usr/bin/env sh
-    python ~/private/roflcommits/roflcommits.py snapshot-and-upload"""
+roflcommits snapshot"""
 
         _create_hooks_dir()
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
 
+        print 'Created commit hooks file %s' % (self.COMMIT_HOOKS_FILE)
+
     def disable_commit_hook(self, options):
         if os.path.exists(self.COMMIT_HOOKS_FILE):
             os.remove(self.COMMIT_HOOKS_FILE)
 
+            print 'Commit hooks file removed'
+        else:
+            print 'Commit hooks file didn\'t exist so not removed'
+
     def enable_push_hook(self, options):
         commit_hook_contents = """#!/usr/bin/env sh
-    python ~/private/roflcommits/roflcommits.py upload"""
+roflcommits upload"""
 
         _create_hooks_dir()
         with open(self.PUSH_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
 
+        print 'Created push hooks file %s' % (self.COMMIT_HOOKS_FILE)
+
     def disable_push_hook(self, options):
         if os.path.exists(self.PUSH_HOOKS_FILE):
             os.remove(self.PUSH_HOOKS_FILE)
+        else:
+            print 'Push hooks file didn\'t exist so not removed'
+
+    def _get_snapshots_dir(self, dir):
+        return os.path.expanduser(os.path.join(dir))
 
     def _get_snapshot_destination(self, dir):
         gp = GitParser()
 
-        return os.path.expanduser(os.path.join(options.destination,
-            gp.get_hash('-1')) + '.jpg')
+        return os.path.join(self._get_snapshots_dir(options.destination), gp.get_hash('-1')) + '.jpg'
 
     def snapshot(self, options):
         gp = GitParser()
-        sn = Snapshot()
+        sn = DummySnapshot()
 
         image_path = sn.snapshot()
         im = ImageManipulator(image_path)
@@ -62,18 +74,29 @@ class Roflcommits:
                 font_file, font_size)
         im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
                 font_file, font_size)
-        print _get_snapshot_destination(options.destination)
-        im.save(_get_snapshot_destination(options.destination))
+        im.save(self._get_snapshot_destination(options.destination))
 
-    def upload(self, options):
-        gp = GitParser()
-        image = _get_snapshot_destination(options.destination)
+    def upload(self, options, file=None):
         f = remote.Flickr()
-        f.upload(image, gp.get_hash('-1').encode('utf-8'), category_name='git commits')
+
+        if file is None:
+            for file in os.listdir(self._get_snapshots_dir(options.destination)):
+                file_path = os.path.join(
+                        self._get_snapshots_dir(options.destination), file
+                )
+                title = os.path.splitext(os.path.basename(file))[0]
+                print "Roflcommits: uploading %s" % title
+                f.upload(file_path, title, category_name='git commits')
+                os.remove(file_path)
+        else:
+            title = os.path.splitext(os.path.basename(file))[0]
+            print "Roflcommits: uploading %s" % title
+            f.upload(file_path, title, category_name='git commits')
+            os.remove(file_path)
 
     def snapshot_upload(self, options):
-        snapshot(options)
-        upload(options)
+        self.snapshot(options)
+        self.upload(options, self._get_snapshot_destination(options.destination))
 
 if __name__ == '__main__':
     font_file = 'data/fonts/impact.ttf'

@@ -11,7 +11,7 @@ class Snapshot:
         self.device = device
 
     def __del__(self):
-        if os.path.exists(self.tmpdir):
+        if self.tmpdir is not None and os.path.exists(self.tmpdir):
             self.cleanup()
 
     def is_linux(self):
@@ -66,3 +66,7 @@ class Snapshot:
 
     def snapshot_win(self):
         pass
+
+class DummySnapshot(Snapshot):
+    def snapshot(self):
+        return 'data/test.jpg'
