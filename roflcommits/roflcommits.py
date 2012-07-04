@@ -98,7 +98,7 @@ roflcommits upload"""
         self.snapshot(options)
         self.upload(options, self._get_snapshot_destination(options.destination))
 
-if __name__ == '__main__':
+def main():
     font_file = 'data/fonts/impact.ttf'
     font_size = 32
 
@@ -124,3 +124,6 @@ if __name__ == '__main__':
         raise Exception('This action doesn\'t exist')
 
     actions[args[0]](options)
+
+if __name__ == '__main__':
+    main()
