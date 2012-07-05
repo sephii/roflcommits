@@ -124,6 +124,9 @@ def main():
         'snapshot-and-upload': rc.snapshot_upload,
     }
 
+    if not args:
+        raise Exception('You must provide an action')
+
     if args[0] not in actions:
         raise Exception('This action doesn\'t exist')
 
