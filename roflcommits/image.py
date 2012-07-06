@@ -10,8 +10,8 @@ class ImageManipulator:
         self.image = Image.open(image_path)
         self.image_path = image_path
 
-    def _cut_text(self, text, font):
-        max_width = self.image.size[0]
+    def _cut_text(self, text, font, padding=0):
+        max_width = self.image.size[0] - padding
 
         if font.getsize(text)[0] < max_width:
             return [text]
@@ -30,13 +30,13 @@ class ImageManipulator:
 
         return text_array
 
-    def add_text(self, text, position, font_file, font_size, 
+    def add_text(self, text, position, font_file, font_size,
                  padding=(10,10,10,10)):
         font = ImageFont.truetype(font_file, font_size)
         id = ImageDraw.Draw(self.image)
         image_width, image_height = self.image.size
         text_width, text_height = font.getsize(text)
-        lines = self._cut_text(text, font)
+        lines = self._cut_text(text, font, padding[1] + padding[3])
         outline = 1
         outline_colour = 'black'
 
