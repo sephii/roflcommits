@@ -57,12 +57,24 @@ class Snapshot:
         if self.device is not None:
             cmd += ['-tv', 'device=%s' % device]
 
-        subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        output = subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        snapshot_path = os.path.join(self.tmpdir, '00000006.jpg')
 
-        return os.path.join(self.tmpdir, '00000006.jpg')
+        if not os.path.exists(snapshot_path):
+            raise SnapshotFailedError(output)
+
+        return snapshot_path
 
     def snapshot_mac(self):
-        pass
+        bin_path = os.path.join(os.path.dirname(__file__), 'bin/imagesnap')
+        snapshot_path = os.path.join(self.tmpdir, 'snapshot.jpg')
+        cmd = [bin_path, snapshot_path]
+        output = subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        if not os.path.exists(snapshot_path):
+            raise SnapshotFailedError(output)
+
+        return snapshot_path
 
     def snapshot_win(self):
         pass

@@ -2,6 +2,7 @@ import optparse
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -34,6 +35,9 @@ roflcommits snapshot"""
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
 
+        os.chmod(self.COMMIT_HOOKS_FILE,
+                 stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
         print 'Created commit hooks file %s' % (self.COMMIT_HOOKS_FILE)
 
     def disable_commit_hook(self, options):
@@ -51,6 +55,9 @@ roflcommits upload"""
         self._create_hooks_dir()
         with open(self.PUSH_HOOKS_FILE, 'w') as f:
             f.write(commit_hook_contents)
+
+        os.chmod(self.COMMIT_HOOKS_FILE,
+                 stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
         print 'Created push hooks file %s' % (self.COMMIT_HOOKS_FILE)
 
