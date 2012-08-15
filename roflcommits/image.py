@@ -76,3 +76,7 @@ class ImageManipulator:
 
     def save(self, file):
         self.image.save(file)
+
+    def resize(self, size):
+        self.image.thumbnail(size)
+

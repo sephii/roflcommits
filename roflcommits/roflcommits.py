@@ -81,6 +81,7 @@ roflcommits upload"""
 
         image_path = sn.snapshot()
         im = ImageManipulator(image_path)
+        im.resize(options.image_size)
         im.add_text(gp.get_message('-1'), ImageManipulator.POSITION_BOTTOMLEFT,
                 self.font_file, self.font_size)
         im.add_text(gp.get_hash('-1')[:10], ImageManipulator.POSITION_TOPRIGHT,
@@ -112,32 +113,40 @@ roflcommits upload"""
 def main():
     font_file = os.path.join(os.path.dirname(__file__), 'data/fonts/impact.ttf')
     font_size = 32
+    image_size = '640x480'
 
     usage = 'foobar'
     opt = optparse.OptionParser(usage=usage, version='%prog')
     opt.add_option('-d', '--destination', dest='destination', help='path to'\
             ' directory that will hold the snapshots', default='~/.roflcommits')
+    opt.add_option('--font', dest='font_path', help='path to'\
+            ' font to use', default=font_file)
+    opt.add_option('--font-size', dest='font_size', help='font size to use'\
+            ', in pt', default=font_size)
+    opt.add_option('--image-size', dest='image_size', help='size of the final'\
+            ' image', default=image_size)
     (options, args) = opt.parse_args()
 
-    rc = Roflcommits(font_file, font_size)
+    options.image_size = tuple(options.image_size.split('x'))
+
+    rc = Roflcommits(options.font_path, options.font_size)
 
     actions = {
         'enable-commit-hook': rc.enable_commit_hook,
         'disable-commit-hook': rc.disable_commit_hook,
-        'enable-push-hook': rc.enable_push_hook,
-        'disable-push-hook': rc.disable_push_hook,
+        #'enable-push-hook': rc.enable_push_hook,
+        #'disable-push-hook': rc.disable_push_hook,
         'snapshot': rc.snapshot,
         'upload': rc.upload,
         'snapshot-and-upload': rc.snapshot_upload,
     }
 
     if not args:
-        raise Exception('You must provide an action')
-
-    if args[0] not in actions:
+        print opt.print_help()
+    elif args[0] not in actions:
         raise Exception('This action doesn\'t exist')
-
-    actions[args[0]](options)
+    else:
+        actions[args[0]](options)
 
 if __name__ == '__main__':
     main()
