@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import optparse
 import os
 import platform
@@ -24,12 +26,15 @@ class Roflcommits:
         self.font_size = font_size
 
     def _create_hooks_dir(self):
+        if not os.path.exists('.git'):
+            raise Exception('You must run this command from the root of your'
+                    ' git repository')
         if not os.path.exists(self.HOOKS_DIR):
             os.mkdir(self.HOOKS_DIR)
 
     def enable_commit_hook(self, options):
         commit_hook_contents = """#!/usr/bin/env sh
-roflcommits snapshot"""
+roflcommits snapshot-and-upload"""
 
         self._create_hooks_dir()
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:
@@ -73,7 +78,7 @@ roflcommits upload"""
     def _get_snapshot_destination(self, dir):
         gp = GitParser()
 
-        return os.path.join(self._get_snapshots_dir(dir), gp.get_hash('-1')) + '.jpg'
+        return '%s.jpg' % os.path.join(self._get_snapshots_dir(dir), gp.get_hash('-1'))
 
     def snapshot(self, options):
         gp = GitParser()
@@ -90,6 +95,8 @@ roflcommits upload"""
 
     def upload(self, options, file=None):
         f = remote.Flickr()
+        f.api_key = options.api_key
+        f.api_secret = options.api_secret
 
         if file is None:
             for file in os.listdir(self._get_snapshots_dir(options.destination)):
@@ -117,14 +124,18 @@ def main():
 
     usage = 'foobar'
     opt = optparse.OptionParser(usage=usage, version='%prog')
-    opt.add_option('-d', '--destination', dest='destination', help='path to'\
+    opt.add_option('-d', '--destination', dest='destination', help='path to'
             ' directory that will hold the snapshots', default='~/.roflcommits')
-    opt.add_option('--font', dest='font_path', help='path to'\
+    opt.add_option('--font', dest='font_path', help='path to'
             ' font to use', default=font_file)
-    opt.add_option('--font-size', dest='font_size', help='font size to use'\
+    opt.add_option('--font-size', dest='font_size', help='font size to use'
             ', in pt', default=font_size)
-    opt.add_option('--image-size', dest='image_size', help='size of the final'\
+    opt.add_option('--image-size', dest='image_size', help='size of the final'
             ' image', default=image_size)
+    opt.add_option('--api-key', dest='api_key', help='your Flickr API key',
+            default='')
+    opt.add_option('--api-secret', dest='api_secret', help='your Flickr API'
+            ' secret', default='')
     (options, args) = opt.parse_args()
 
     try:

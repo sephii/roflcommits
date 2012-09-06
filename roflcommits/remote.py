@@ -6,8 +6,8 @@ class Remote:
         raise NotImplementedError()
 
 class Flickr(Remote):
-    api_key = ''
-    api_secret = ''
+    api_key = None
+    api_secret = None
 
     def __init__(self):
         import flickrapi
@@ -20,6 +20,10 @@ class Flickr(Remote):
 
     def upload(self, image_path, image_title, image_description='',
                category_name=None):
+        if self.api_key is None or self.api_secret is None:
+            raise Exception('You must set the API key and API secret to be able'
+                            ' to upload your images on Flickr')
+
         photo = self.flickr.upload(filename=image_path,
                 title=image_title,
                 description=image_description,

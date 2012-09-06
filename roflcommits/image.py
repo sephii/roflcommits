@@ -79,4 +79,3 @@ class ImageManipulator:
 
     def resize(self, size):
         self.image.thumbnail(size)
-
