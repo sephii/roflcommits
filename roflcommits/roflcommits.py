@@ -127,7 +127,14 @@ def main():
             ' image', default=image_size)
     (options, args) = opt.parse_args()
 
-    options.image_size = tuple(options.image_size.split('x'))
+    try:
+        options.image_size = tuple([int(x) for x in options.image_size.split('x')])
+    except ValueError:
+        raise Exception('The --image-size argument must contain a YxZ value'
+            ' where Y and Z are numeric')
+
+    if len(options.image_size) < 2:
+        raise Exception('The --image-size argument must contain a YxZ value')
 
     rc = Roflcommits(options.font_path, options.font_size)
 
