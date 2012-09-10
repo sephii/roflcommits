@@ -2,7 +2,9 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 import tempfile
+import time
 
 class Snapshot:
     def __init__(self, delay=0, device=None):
@@ -34,7 +36,7 @@ class Snapshot:
         }
 
         if platform.system() not in methods:
-            raise Exception('Your platform \'%s\' is not supported yet' %
+            raise NotImplementedError('Your platform \'%s\' is not supported yet' %
                     platform.system())
 
         self.tmpdir = tempfile.mkdtemp()
@@ -49,16 +51,16 @@ class Snapshot:
         return methods[platform.system()]()
 
     def snapshot_linux(self):
-        frames = '6'
+        frames = 6
 
         cmd = ['mplayer', '-vo', 'jpeg:outdir=%s' % self.tmpdir,
-            '-frames', frames, 'tv://']
+            '-frames', str(frames), 'tv://']
 
         if self.device is not None:
             cmd += ['-tv', 'device=%s' % device]
 
         output = subprocess.call(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        snapshot_path = os.path.join(self.tmpdir, '00000006.jpg')
+        snapshot_path = os.path.join(self.tmpdir, '%.8d.jpg' % frames)
 
         if not os.path.exists(snapshot_path):
             raise SnapshotFailedError(output)
@@ -77,7 +79,8 @@ class Snapshot:
         return snapshot_path
 
     def snapshot_win(self):
-        pass
+        raise NotImplementedError('Your platform \'%s\' is not supported yet' %
+                platform.system())
 
 class DummySnapshot(Snapshot):
     def snapshot(self):

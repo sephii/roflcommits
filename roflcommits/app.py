@@ -6,9 +6,7 @@ import platform
 import shutil
 import stat
 import subprocess
-import sys
 import tempfile
-import time
 
 import remote
 
@@ -83,7 +81,7 @@ roflcommits upload"""
 
     def snapshot(self, options):
         gp = GitParser()
-        sn = Snapshot()
+        sn = Snapshot(int(options.delay), options.device)
 
         image_path = sn.snapshot()
         im = ImageManipulator(image_path)
@@ -133,18 +131,22 @@ Available commands:
   snapshot-and-upload  \t\tTakes a snapshot and upload it to Flickr"""
 
     opt = optparse.OptionParser(usage=usage, version=__version__)
+    opt.add_option('--api-key', dest='api_key', help='your Flickr API key',
+            default='')
+    opt.add_option('--api-secret', dest='api_secret', help='your Flickr API'
+            ' secret', default='')
+    opt.add_option('-s', '--delay', dest='delay', help='delay in seconds before'
+            ' taking the snapshot', default=0)
     opt.add_option('-d', '--destination', dest='destination', help='path to'
-            ' directory that will hold the snapshots', default='~/.roflcommits')
+            ' directory that will hold the snapshots (default is ~/.roflcommits)', default='~/.roflcommits')
+    opt.add_option('-v', '--device', dest='device', help='Linux only. The'
+            ' device to tell mplayer to use to take the snapshot', default=None)
     opt.add_option('--font', dest='font_path', help='path to'
             ' font to use', default=font_file)
     opt.add_option('--font-size', dest='font_size', help='font size to use'
             ', in pt', default=font_size)
     opt.add_option('--image-size', dest='image_size', help='size of the final'
             ' image', default=image_size)
-    opt.add_option('--api-key', dest='api_key', help='your Flickr API key',
-            default='')
-    opt.add_option('--api-secret', dest='api_secret', help='your Flickr API'
-            ' secret', default='')
     (options, args) = opt.parse_args()
 
     try:
@@ -169,7 +171,7 @@ Available commands:
     }
 
     if not args:
-        print opt.print_help()
+        opt.print_help()
     elif args[0] not in actions:
         raise Exception('This action doesn\'t exist')
     else:
