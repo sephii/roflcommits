@@ -14,6 +14,7 @@ import remote
 
 from git import GitParser
 from image import ImageManipulator
+from roflcommits import __version__
 from snapshot import DummySnapshot, Snapshot
 
 class Roflcommits:
@@ -122,8 +123,16 @@ def main():
     font_size = 32
     image_size = '640x480'
 
-    usage = 'foobar'
-    opt = optparse.OptionParser(usage=usage, version='%prog')
+    usage = """Usage: %prog [options] command
+
+Available commands:
+  enable-commit-hook   \t\tEnables the `snapshot-and-upload` command on each commit
+  disable-commit-hook  \t\tDisables the commit hook
+  snapshot             \t\tMakes a snapshot and stores it in your ~/.roflcommits/ directory
+  upload               \t\tUploads all snapshots in your ~/.roflcommits/ directory on Flickr
+  snapshot-and-upload  \t\tTakes a snapshot and upload it to Flickr"""
+
+    opt = optparse.OptionParser(usage=usage, version=__version__)
     opt.add_option('-d', '--destination', dest='destination', help='path to'
             ' directory that will hold the snapshots', default='~/.roflcommits')
     opt.add_option('--font', dest='font_path', help='path to'
