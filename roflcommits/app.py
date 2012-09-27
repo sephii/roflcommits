@@ -32,8 +32,15 @@ class Roflcommits:
             os.mkdir(self.HOOKS_DIR)
 
     def enable_commit_hook(self, options):
+        if options.api_key and options.api_secret:
+            args = "--api_key %s --api_secret %s" % (
+                    options.api_key, options.api_secret
+            )
+        else:
+            args = ''
+
         commit_hook_contents = """#!/usr/bin/env sh
-roflcommits snapshot-and-upload"""
+roflcommits snapshot-and-upload %s""" % args
 
         self._create_hooks_dir()
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:

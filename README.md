@@ -19,7 +19,7 @@ Roflcommits makes use of the following libraries/programs:
 
 Install the dependencies listed above and then use pip to install roflcommits:
 
-    pip install http://github.com/sephii/roflcommits
+    pip install git+git://github.com/sephii/roflcommits@master
 
 ## Usage
 
@@ -29,17 +29,14 @@ Start by adding the commit hook on one of your git repositories:
 
 This will create a commit hook file in your `.git/hooks/` directory. This hook
 will just take a picture on each commit and store it in your ~/.roflcommits
-directory. If you want to directly upload the picture to Flickr, just edit the
-hook file `.git/hooks/post-commit` and replace `snapshot` by
-`snapshot-and-upload`. Doing this will make your commits take more time because
-you'll have to wait for your picture to be uploaded each time you make a commit.
-Also the upload won't work if you're not connected to the internets.
+directory. If you want to upload the pictures to Flickr, use the following:
 
-A better way is to keep using the `snapshot` command on commit and use the
-`upload` command on push. To do that, use the following:
+    roflcommits enable-commit-hook --api-key=xxx --api-secret=yyy
 
-    roflcommits enable-push-hook
+Where `api_key` and `api_secret` are your API key and secret from your Flickr
+account.
 
-This will add a push hook that will upload all the pictures that have been taken
-along with your commits.
+If you have some images in your `~/.roflcommits` directory you want to upload,
+you can simply execute the following from anywhere:
 
+    roflcommits upload --api_key=xxx --api_secret=yyy
