@@ -1,4 +1,4 @@
 #!/usr/bin/env python
-from roflcommits import roflcommits
+from roflcommits import app
 
-roflcommits.main()
+app.main()
