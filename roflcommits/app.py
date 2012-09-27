@@ -100,9 +100,7 @@ roflcommits upload"""
         im.save(self._get_snapshot_destination(options.destination))
 
     def upload(self, options, file=None):
-        f = remote.Flickr()
-        f.api_key = options.api_key
-        f.api_secret = options.api_secret
+        f = remote.Flickr(options.api_key, options.api_secret)
 
         if file is None:
             for file in os.listdir(self._get_snapshots_dir(options.destination)):

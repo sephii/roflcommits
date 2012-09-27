@@ -9,8 +9,11 @@ class Flickr(Remote):
     api_key = None
     api_secret = None
 
-    def __init__(self):
+    def __init__(self, api_key, api_secret):
         import flickrapi
+
+        self.api_key = api_key
+        self.api_secret = api_secret
 
         self.flickr = flickrapi.FlickrAPI(self.api_key, self.api_secret)
         (token, frob) = self.flickr.get_token_part_one(perms='write')
