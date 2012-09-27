@@ -43,10 +43,10 @@ directory. If you want to upload the pictures to Flickr, use the following:
 
     roflcommits enable-commit-hook --api-key=xxx --api-secret=yyy
 
-Where `api_key` and `api_secret` are your API key and secret from your Flickr
+Where `api-key` and `api-secret` are your API key and secret from your Flickr
 account.
 
 If you have some images in your `~/.roflcommits` directory you want to upload,
 you can simply execute the following from anywhere:
 
-    roflcommits upload --api_key=xxx --api_secret=yyy
+    roflcommits upload --api-key=xxx --api-secret=yyy
