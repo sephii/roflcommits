@@ -26,6 +26,11 @@ You can also use pip to install the dependencies like so:
 
     pip install pil flickrapi
 
+If you don't have pip, get the source either by cloning the repo or downloading
+the zip, then do:
+
+    sudo python setup.py install
+
 ## Usage
 
 Start by adding the commit hook on one of your git repositories:
