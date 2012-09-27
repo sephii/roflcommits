@@ -14,12 +14,17 @@ Roflcommits makes use of the following libraries/programs:
 
 * mplayer (only on Linux, for taking snapshots)
 * python-flickrapi (only if you use Flickr publication)
+* PIL (aka python imaging library)
 
 ## Installation
 
 Install the dependencies listed above and then use pip to install roflcommits:
 
     pip install git+git://github.com/sephii/roflcommits@master
+
+You can also use pip to install the dependencies like so:
+
+    pip install pil flickrapi
 
 ## Usage
 
