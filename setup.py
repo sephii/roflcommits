@@ -6,7 +6,7 @@ setup(
     name='roflcommits',
     version=__version__,
     packages=['roflcommits'],
-    package_data={'roflcommits': ['data/fonts/*.ttf']},
+    package_data={'roflcommits': ['data/fonts/*.ttf', 'bin/imagesnap']},
     description='Save your commit faces for posterity',
     author='Sylvain Fankhauser',
     author_email='sylvain.fankhauser@liip.ch',
