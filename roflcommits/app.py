@@ -79,7 +79,17 @@ roflcommits upload"""
             print 'Push hooks file didn\'t exist so not removed'
 
     def _get_snapshots_dir(self, dir):
-        return os.path.expanduser(os.path.join(dir))
+        snapshots_dir = getattr(self, '_snapshots_dir', None)
+
+        if not snapshots_dir:
+            snapshots_dir = os.path.expanduser(os.path.join(dir))
+
+            if not os.path.exists(snapshots_dir):
+                os.mkdir(snapshots_dir)
+
+            setattr(self, '_snapshots_dir', snapshots_dir)
+
+        return snapshots_dir
 
     def _get_snapshot_destination(self, dir):
         gp = GitParser()
