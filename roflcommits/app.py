@@ -33,7 +33,7 @@ class Roflcommits:
 
     def enable_commit_hook(self, options):
         if options.api_key and options.api_secret:
-            args = "--api_key %s --api_secret %s" % (
+            args = "--api-key %s --api-secret %s" % (
                     options.api_key, options.api_secret
             )
         else:
