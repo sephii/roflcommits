@@ -12,24 +12,43 @@ This project is largely inspired by
 
 Roflcommits makes use of the following libraries/programs:
 
-* mplayer (only on Linux, for taking snapshots)
-* python-flickrapi (only if you use Flickr publication)
+* mplayer (only if you're running GNU/Linux, for taking snapshots)
+* python-flickrapi (only if you're going to use Flickr publication)
 * PIL (aka python imaging library)
 
 ## Installation
 
-Install the dependencies listed above and then use pip to install roflcommits:
+### Install dependencies
 
-    pip install git+git://github.com/sephii/roflcommits@master
+If you're running GNU/Linux, start by installing mplayer and some libraries that
+are required to install PIL correctly (with JPEG and TrueType support):
 
-You can also use pip to install the dependencies like so:
+    sudo apt-get install mplayer libfreetype6 libfreetype6-dev libjpeg62 libjpeg62-dev
 
-    pip install pil flickrapi
+Then, whatever OS you're running, install the dependencies using pip:
 
-If you don't have pip, get the source either by cloning the repo or downloading
-the zip, then do:
+    sudo pip install flickrapi pil
 
-    sudo python setup.py install
+If you don't have pip installed, you can get it that way:
+
+    sudo easy_install pip
+
+### Install Roflcommits
+
+Once the dependencies are installed, install roflcommits:
+
+    sudo pip install git+git://github.com/sephii/roflcommits@master
+
+### Installation without pip
+
+If you really don't want to have pip installed, you can still try to install the
+dependencies with easy_install:
+
+    sudo easy_install pip flickrapi
+
+Then install roflcommits:
+
+    sudo easy_install https://github.com/sephii/roflcommits/zipball/master
 
 ## Usage
 
