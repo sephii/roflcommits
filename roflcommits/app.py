@@ -163,7 +163,7 @@ Available commands:
     opt.add_option('--font-size', dest='font_size', help='font size to use'
             ', in pt', default=font_size)
     opt.add_option('--image-size', dest='image_size', help='size of the final'
-            ' image', default=image_size)
+            ' image (syntax YxZ)', default=image_size)
     (options, args) = opt.parse_args()
 
     try:
