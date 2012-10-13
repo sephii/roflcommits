@@ -7,10 +7,11 @@ import tempfile
 import time
 
 class Snapshot:
-    def __init__(self, delay=0, device=None):
+    def __init__(self, delay=0, device=None, skip_frames=0):
         self.delay = delay
         self.tmpdir = None
         self.device = device
+        self.skip_frames = skip_frames
 
     def __del__(self):
         if self.tmpdir is not None and os.path.exists(self.tmpdir):
@@ -51,7 +52,7 @@ class Snapshot:
         return methods[platform.system()]()
 
     def snapshot_linux(self):
-        frames = 6
+        frames = self.skip_frames
 
         cmd = ['mplayer', '-vo', 'jpeg:outdir=%s' % self.tmpdir,
             '-frames', str(frames), 'tv://']

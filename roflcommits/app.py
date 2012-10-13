@@ -100,7 +100,8 @@ roflcommits upload"""
 
     def snapshot(self, options):
         gp = GitParser()
-        sn = Snapshot(int(options.delay), options.device)
+        sn = Snapshot(int(options.delay), options.device,
+                      int(options.skip_frames))
 
         image_path = sn.snapshot()
         im = ImageManipulator(image_path)
@@ -137,6 +138,7 @@ def main():
     font_file = os.path.join(os.path.dirname(__file__), 'data/fonts/impact.ttf')
     font_size = 32
     image_size = '640x480'
+    skip_frames = 6
 
     usage = """Usage: %prog [options] command
 
@@ -164,6 +166,9 @@ Available commands:
             ', in pt', default=font_size)
     opt.add_option('--image-size', dest='image_size', help='size of the final'
             ' image (syntax YxZ)', default=image_size)
+    opt.add_option('--skip-frames', dest='skip_frames', help='(Linux only) the'
+            ' number of frames to skip. Usually the webcam takes some time to'
+            ' calibrate. Default is %s' % (skip_frames), default=skip_frames)
     (options, args) = opt.parse_args()
 
     try:
