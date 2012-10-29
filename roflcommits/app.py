@@ -3,6 +3,7 @@
 import optparse
 import os
 import platform
+import runpy
 import shutil
 import stat
 import subprocess
@@ -15,14 +16,51 @@ from image import ImageManipulator
 from roflcommits import __version__
 from snapshot import DummySnapshot, Snapshot
 
+class Settings:
+    def get_repository_settings(self, path):
+        repositories = getattr(self, 'REPOSITORIES', None)
+        if repositories is None:
+            raise Exception('Settings REPOSITORIES doesn\'t exist')
+
+        if path not in repositories:
+            raise Exception('No such repository `%s`' % path)
+
+        if ('flickr' in repositories[path] and
+                isinstance(repositories[path]['flickr'], str)):
+            repositories[path]['flickr'] = self.FLICKR_ACCOUNTS[repositories[path]['flickr']]
+
+        return repositories[path]
+
 class Roflcommits:
     HOOKS_DIR = '.git/hooks'
     COMMIT_HOOKS_FILE = os.path.join(HOOKS_DIR, 'post-commit')
     PUSH_HOOKS_FILE = os.path.join(HOOKS_DIR, 'update')
 
-    def __init__(self, font_file, font_size):
+    def __init__(self, font_file, font_size, settings_path):
         self.font_file = font_file
         self.font_size = font_size
+        self.settings_path = os.path.expanduser(settings_path)
+
+        self.settings = self._load_settings(self.settings_path)
+
+    def _load_settings(self, path):
+        settings = Settings()
+
+        try:
+            settings_dict = runpy.run_path(path)
+        except IOError:
+            raise RuntimeError("Config file not found")
+        except Exception:
+            raise RuntimeError("Unable to parse the config file")
+
+        for (var, val) in settings_dict.iteritems():
+            if var == var.upper():
+                setattr(settings, var, val)
+
+        return settings
+
+    def _load_repository_settings(self):
+        self.repository_settings = self.settings.get_repository_settings(os.getcwd())
 
     def _create_hooks_dir(self):
         if not os.path.exists('.git'):
@@ -32,17 +70,15 @@ class Roflcommits:
             os.mkdir(self.HOOKS_DIR)
 
     def enable_commit_hook(self, options):
-        if options.api_key and options.api_secret:
+        self._load_repository_settings()
+
+        if 'flickr' in self.repository_settings:
             command = "snapshot-and-upload"
-            args = "--api-key %s --api-secret %s" % (
-                    options.api_key, options.api_secret
-            )
         else:
             command = "snapshot"
-            args = ''
 
         commit_hook_contents = """#!/usr/bin/env sh
-roflcommits %s %s""" % (command, args)
+roflcommits %s""" % (command)
 
         self._create_hooks_dir()
         with open(self.COMMIT_HOOKS_FILE, 'w') as f:
@@ -84,7 +120,9 @@ roflcommits upload"""
         snapshots_dir = getattr(self, '_snapshots_dir', None)
 
         if not snapshots_dir:
-            snapshots_dir = os.path.expanduser(os.path.join(dir))
+            # TODO mkdir -p
+            snapshots_dir = os.path.expanduser(os.path.join(dir,
+                self.repository_settings['name']))
 
             if not os.path.exists(snapshots_dir):
                 os.mkdir(snapshots_dir)
@@ -99,6 +137,7 @@ roflcommits upload"""
         return '%s.jpg' % os.path.join(self._get_snapshots_dir(dir), gp.get_hash('-1'))
 
     def snapshot(self, options):
+        self._load_repository_settings()
         gp = GitParser()
         sn = Snapshot(int(options.delay), options.device,
                       int(options.skip_frames))
@@ -113,7 +152,9 @@ roflcommits upload"""
         im.save(self._get_snapshot_destination(options.destination))
 
     def upload(self, options, file=None):
-        f = remote.Flickr(options.api_key, options.api_secret)
+        self._load_repository_settings()
+        f = remote.Flickr(self.repository_settings['flickr'][0],
+                          self.repository_settings['flickr'][1])
 
         if file is None:
             for file in os.listdir(self._get_snapshots_dir(options.destination)):
@@ -180,7 +221,7 @@ Available commands:
     if len(options.image_size) < 2:
         raise Exception('The --image-size argument must contain a YxZ value')
 
-    rc = Roflcommits(options.font_path, options.font_size)
+    rc = Roflcommits(options.font_path, options.font_size, '~/.roflcommitsrc')
 
     actions = {
         'enable-commit-hook': rc.enable_commit_hook,
