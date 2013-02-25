@@ -120,12 +120,11 @@ roflcommits upload"""
         snapshots_dir = getattr(self, '_snapshots_dir', None)
 
         if not snapshots_dir:
-            # TODO mkdir -p
             snapshots_dir = os.path.expanduser(os.path.join(dir,
                 self.repository_settings['name']))
 
             if not os.path.exists(snapshots_dir):
-                os.mkdir(snapshots_dir)
+                os.makedirs(snapshots_dir)
 
             setattr(self, '_snapshots_dir', snapshots_dir)
 
