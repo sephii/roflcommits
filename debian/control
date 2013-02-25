@@ -1,0 +1,15 @@
+Source: roflcommits
+Section: comm
+Priority: extra
+Maintainer: Gilles Meier <gilles.meier@liip.ch>
+Build-Depends: debhelper (>= 9), python, help2man
+Standards-Version: 3.9.3
+Homepage: https://github.com/sephii/roflcommits
+Vcs-Git: git://github.com/sephii/roflcommits.git
+Vcs-Browser: https://github.com/sephii/roflcommits
+
+Package: roflcommits
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+X-Python-Version: >= 2.6
+Description: Take a webcam shot on each commit
