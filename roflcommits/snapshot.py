@@ -6,6 +6,9 @@ import sys
 import tempfile
 import time
 
+class SnapshotFailedError(StandardError):
+    pass
+
 class Snapshot:
     def __init__(self, delay=0, device=None, skip_frames=0):
         self.delay = delay
