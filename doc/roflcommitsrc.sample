@@ -1,0 +1,25 @@
+# This is a basic roflcommits configuration file. Put it in ~/.roflcommits.rc
+
+# Set to False to keep snapshots in the roflcommits dir after uploading them
+DELETE_AFTER_UPLOAD = True
+
+# Your flickr accounts, if any
+FLICKR_ACCOUNTS = {
+   #'flickr_account_name': ('public_key', 'private_key')
+}
+
+# The list of repositories you want to use roflcommits on
+REPOSITORIES = {
+    # A standard repository that will upload your pictures to your default
+    # flickr account
+    '/path/to/your/git/repository': {
+        'name': 'my_repository',
+        'flickr': 'flickr_account_name',
+    },
+
+    # Pictures from this repository won't get uploaded
+    '/path/to/your/git/repository/no/flickr': {
+        'name': 'roflcommits',
+    },
+}
+
