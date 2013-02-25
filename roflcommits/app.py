@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 import optparse
 import os
 import platform
@@ -152,6 +153,13 @@ roflcommits upload"""
 
     def upload(self, options, file=None):
         self._load_repository_settings()
+
+        if 'flickr' not in self.repository_settings:
+            logging.warning("You used the `snapshot-and-upload` command, but"
+                            " there's no flickr account defined for this"
+                            " repository")
+            return
+
         f = remote.Flickr(self.repository_settings['flickr'][0],
                           self.repository_settings['flickr'][1])
 
@@ -172,6 +180,7 @@ roflcommits upload"""
 
     def snapshot_upload(self, options):
         self.snapshot(options)
+
         self.upload(options, self._get_snapshot_destination(options.destination))
 
 def main():
